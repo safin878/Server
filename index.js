@@ -7,7 +7,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.c9pict7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -22,12 +22,76 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const addLessonCollection = client.db("VocabSakura").collection("Lessons");
+    const AddVocabularyCollection = client
+      .db("VocabSakura")
+      .collection("Vocabularies");
 
-    //Add Lesson
+    //Add Lesson Start
     app.post("/addLessons", async (req, res) => {
       const user = req.body;
 
       const result = await addLessonCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.get("/addLessons", async (req, res) => {
+      const result = await addLessonCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/addLessons/:id", async (req, res) => {
+      const lessonId = req.params.id;
+
+      const { Lesson_Name, Lesson_Number } = req.body;
+      const updatedLesson = {
+        Lesson_Name,
+        Lesson_Number,
+      };
+
+      try {
+        const result = await addLessonCollection.updateOne(
+          { _id: new ObjectId(lessonId) },
+          { $set: updatedLesson }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res.status(404).send({ message: "Lesson not found" });
+        }
+
+        res.send({ message: "Lesson updated successfully" });
+      } catch (error) {
+        console.error("Error updating lesson:", error);
+        res.status(500).send({ message: "Error updating lesson" });
+      }
+    });
+
+    app.delete("/addLessons/:id", async (req, res) => {
+      const lessonId = req.params.id;
+
+      try {
+        const result = await addLessonCollection.deleteOne({
+          _id: new ObjectId(lessonId),
+        });
+
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ message: "Lesson not found" });
+        }
+
+        res.send({ message: "Lesson deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting Lesson:", error);
+        res.status(500).send({ message: "Error deleting Lesson" });
+      }
+    });
+
+    //Add Lesson End
+
+    //AddVocabulary Start
+
+    app.post("/addVocabulary", async (req, res) => {
+      const user = req.body;
+
+      const result = await AddVocabularyCollection.insertOne(user);
       res.send(result);
     });
 
