@@ -191,21 +191,6 @@ async function run() {
       }
     });
 
-    // Fetch vocabularies by Lesson_No
-    // app.get("/addVocabulary/lesson/:lessonNumber", async (req, res) => {
-    //   const { lessonNumber } = req.params; // Extract lesson number from URL
-
-    //   try {
-    //     const result = await AddVocabularyCollection.find({
-    //       Lesson_No: lessonNumber,
-    //     }).toArray();
-    //     res.send(result);
-    //   } catch (error) {
-    //     console.error("Error fetching vocabularies:", error);
-    //     res.status(500).send({ message: "Error fetching vocabularies" });
-    //   }
-    // });
-
     //Some dynamic
     app.get("/addLessons", async (req, res) => {
       const { page = 1, limit = 1 } = req.query; // Default page 1, limit 1
@@ -235,6 +220,28 @@ async function run() {
       } catch (error) {
         console.error("Error fetching vocabularies:", error);
         res.status(500).send({ message: "Error fetching vocabularies" });
+      }
+    });
+
+    app.get("/addLessonsWithCount", async (req, res) => {
+      try {
+        const lessons = await addLessonCollection.find().toArray();
+
+        const lessonsWithCount = await Promise.all(
+          lessons.map(async (lesson) => {
+            const count = await AddVocabularyCollection.countDocuments({
+              Lesson_No: lesson.Lesson_Number,
+            });
+            return { ...lesson, vocabularyCount: count };
+          })
+        );
+
+        res.send(lessonsWithCount);
+      } catch (error) {
+        console.error("Error fetching lessons with vocabulary count:", error);
+        res
+          .status(500)
+          .send({ message: "Error fetching lessons with vocabulary count" });
       }
     });
 
