@@ -95,6 +95,58 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/addVocabulary", async (req, res) => {
+      const result = await AddVocabularyCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/addVocabulary/:id", async (req, res) => {
+      const VocabId = req.params.id;
+
+      const { Word, Pronunciation, When_to_Say, Lesson_No } = req.body;
+      const updatedVocab = {
+        Word,
+        Pronunciation,
+        When_to_Say,
+        Lesson_No,
+      };
+
+      try {
+        const result = await AddVocabularyCollection.updateOne(
+          { _id: new ObjectId(VocabId) },
+          { $set: updatedVocab }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res.status(404).send({ message: "Vocabulary not found" });
+        }
+
+        res.send({ message: "Vocabulary updated successfully" });
+      } catch (error) {
+        console.error("Error updating Vocabulary:", error);
+        res.status(500).send({ message: "Error updating Vocabulary" });
+      }
+    });
+
+    app.delete("/addVocabulary/:id", async (req, res) => {
+      const VocabId = req.params.id;
+
+      try {
+        const result = await AddVocabularyCollection.deleteOne({
+          _id: new ObjectId(VocabId),
+        });
+
+        if (result.deletedCount === 0) {
+          return res.status(404).send({ message: "Vocabulary not found" });
+        }
+
+        res.send({ message: "Vocabulary deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting Vocabulary:", error);
+        res.status(500).send({ message: "Error deleting Vocabulary" });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
