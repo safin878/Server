@@ -192,13 +192,45 @@ async function run() {
     });
 
     // Fetch vocabularies by Lesson_No
+    // app.get("/addVocabulary/lesson/:lessonNumber", async (req, res) => {
+    //   const { lessonNumber } = req.params; // Extract lesson number from URL
+
+    //   try {
+    //     const result = await AddVocabularyCollection.find({
+    //       Lesson_No: lessonNumber,
+    //     }).toArray();
+    //     res.send(result);
+    //   } catch (error) {
+    //     console.error("Error fetching vocabularies:", error);
+    //     res.status(500).send({ message: "Error fetching vocabularies" });
+    //   }
+    // });
+
+    //Some dynamic
+    app.get("/addLessons", async (req, res) => {
+      const { page = 1, limit = 1 } = req.query; // Default page 1, limit 1
+      const skip = (page - 1) * limit;
+
+      const result = await addLessonCollection
+        .find()
+        .skip(Number(skip))
+        .limit(Number(limit))
+        .toArray();
+      res.send(result);
+    });
+
     app.get("/addVocabulary/lesson/:lessonNumber", async (req, res) => {
-      const { lessonNumber } = req.params; // Extract lesson number from URL
+      const { lessonNumber } = req.params;
+      const { page = 1, limit = 1 } = req.query; // Default page 1, limit 1
+      const skip = (page - 1) * limit;
 
       try {
         const result = await AddVocabularyCollection.find({
           Lesson_No: lessonNumber,
-        }).toArray();
+        })
+          .skip(Number(skip))
+          .limit(Number(limit))
+          .toArray();
         res.send(result);
       } catch (error) {
         console.error("Error fetching vocabularies:", error);
