@@ -26,6 +26,8 @@ async function run() {
       .db("VocabSakura")
       .collection("Vocabularies");
 
+    const userCollection = client.db("VocabSakura").collection("Users");
+
     //Add Lesson Start
     app.post("/addLessons", async (req, res) => {
       const user = req.body;
@@ -146,6 +148,19 @@ async function run() {
         console.error("Error deleting Vocabulary:", error);
         res.status(500).send({ message: "Error deleting Vocabulary" });
       }
+    });
+    //AddVocabulary End
+
+    //Manage User Start
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "User Already Exist" });
+      }
+      const result = await userCollection.insertOne(user);
+      res.json(result);
     });
 
     await client.db("admin").command({ ping: 1 });
