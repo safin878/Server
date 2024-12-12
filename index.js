@@ -191,6 +191,21 @@ async function run() {
       }
     });
 
+    // Fetch vocabularies by Lesson_No
+    app.get("/addVocabulary/lesson/:lessonNumber", async (req, res) => {
+      const { lessonNumber } = req.params; // Extract lesson number from URL
+
+      try {
+        const result = await AddVocabularyCollection.find({
+          Lesson_No: lessonNumber,
+        }).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching vocabularies:", error);
+        res.status(500).send({ message: "Error fetching vocabularies" });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
