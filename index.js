@@ -163,6 +163,34 @@ async function run() {
       res.json(result);
     });
 
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/users/update/:email", async (req, res) => {
+      const { email } = req.params;
+      const { role } = req.body;
+
+      try {
+        const result = await userCollection.updateOne(
+          { email },
+          { $set: { role } }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res
+            .status(404)
+            .send({ message: "User not found or role unchanged" });
+        }
+
+        res.send({ message: "Role updated successfully" });
+      } catch (error) {
+        console.error("Error updating role:", error);
+        res.status(500).send({ message: "Error updating role" });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
