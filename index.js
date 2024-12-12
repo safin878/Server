@@ -103,9 +103,10 @@ async function run() {
     app.patch("/addVocabulary/:id", async (req, res) => {
       const VocabId = req.params.id;
 
-      const { Word, Pronunciation, When_to_Say, Lesson_No } = req.body;
+      const { Word, Meaning, Pronunciation, When_to_Say, Lesson_No } = req.body;
       const updatedVocab = {
         Word,
+        Meaning,
         Pronunciation,
         When_to_Say,
         Lesson_No,
